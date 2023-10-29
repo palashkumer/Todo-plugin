@@ -5,8 +5,17 @@
  * Description: This is for employee management system where you can create ,read , update & delete employee.
  * Version: 1.0.0
  * Author: Palash Kumer
- * Author URI: https://www.facebook.com/PalashKantiShil.nstu.cste13
+ * Author URI: https://github.com/palashkumer
  */
+
+// function enqueue_employee_list_styles()
+// {
+//     wp_enqueue_style('employee-list-styles', plugins_url('css/employee-list-styles.css', __FILE__));
+// }
+
+// add_action('admin_enqueue_scripts', 'enqueue_employee_list_styles');
+
+
 
 
 register_activation_hook(__FILE__, 'table_creator');
@@ -40,9 +49,15 @@ function  display_esm_menu()
     //Add Menu for Update
     add_submenu_page(null, 'Update Employee', 'Update Employee', 'manage_options', 'update-emp', 'emp_update_call');
 
-    //for  Delete
+    //Add Menu for  Delete
     add_submenu_page(null, 'Delete Employee', 'Delete Employee', 'manage_options', 'delete-emp', 'emp_delete_call');
 }
+
+function enqueue_employee_table_styles()
+{
+    wp_enqueue_style('employee-table-styles', plugin_dir_url(__FILE__) . 'css/employee-list-styles.css');
+}
+add_action('admin_enqueue_scripts', 'enqueue_employee_table_styles');
 
 function ems_add_callback()
 {
@@ -73,35 +88,38 @@ function ems_add_callback()
 ?>
     <h4 id="msg"><?php echo $msg; ?></h4>
 
-    <form method="post" style="margin-top: 40px;">
-        <h1> Add Employee </h1>
+
+
+    <h1> Add Employee </h1>
+    <form method="post" style="margin-top: 40px;" class="add_employee_style">
+
         <p>
-            <label>EMP ID</label>
-            <input type="text" name="emp_id" placeholder="Enter ID" required>
+            <label class="lable_style">EMP ID</label>
+            <input class="input_box_style" type="text" name="emp_id" placeholder="Enter ID" required>
 
         </p>
 
         <p>
-            <label>Name</label>
-            <input type="text" name="emp_name" placeholder="Enter Name" required>
+            <label class="lable_style">Name</label>
+            <input class="input_box_style" type="text" name="emp_name" placeholder="Enter Name" required>
 
         </p>
         <p>
-            <label>Email</label>
-            <input type="email" name="emp_email" placeholder="Enter Email" required>
+            <label class="lable_style">Email</label>
+            <input class="input_box_style" type="email" name="emp_email" placeholder="Enter Email" required>
         </p>
         <p>
-            <label>Department</label>
-            <input type="text" name="emp_dept" placeholder="Enter Department" required>
-        </p>
-
-        <p>
-            <label>Date</label>
-            <input type="date" name="emp_date" required> <!-- Add the date input field -->
+            <label class="lable_style">Department</label>
+            <input class="input_box_style" type="text" name="emp_dept" placeholder="Enter Department" required>
         </p>
 
         <p>
-            <button type="submit" name="submit">Submit</button>
+            <label class="lable_style">Date</label>
+            <input class="input_box_style" type="date" name="emp_date" required>
+        </p>
+
+        <p>
+            <button class="btn_style" type="submit" name="submit">Submit</button>
         </p>
     </form>
     <?php }
@@ -114,8 +132,8 @@ function ems_list_callback()
     $employee_list = $wpdb->get_results($wpdb->prepare("select * FROM $table_name", ""), ARRAY_A);
     if (count($employee_list) > 0) : ?>
         <div style="margin-top: 40px;">
-            <h1 style="margin-left: 170px;"> Employee List</h1>
-            <table border="1" cellpadding="10">
+            <h1 class="emp_heading"> Employee List</h1>
+            <table class="employee-list-table" border="1" cellpadding="10">
                 <tr>
                     <th>S.No.</th>
                     <th>EMP ID</th>
@@ -223,4 +241,8 @@ function emp_delete_call()
         </p>
     </form>
 
-<?php }
+
+<?php
+
+
+}

@@ -1,0 +1,32 @@
+.employee-list-table {
+    background-color: #0b0736;
+    color: white;
+}
+
+.emp_heading{
+    margin-left: 25%;
+    color: #244d68;
+
+}
+
+.add_employee_style{
+    margin-top: 40px;
+    width: 400px;
+    background-color: #0b0736;
+    color: white;
+    padding: 2px 2px 2px 10px;
+    
+}
+
+.btn_style{
+    background-color: 7a74bf;
+    color: white;
+    font-size: 14px;
+    border-radius: 13px;
+}
+.lable_style{
+    width: 50px;
+}
+
+.input_box_style{
+}
