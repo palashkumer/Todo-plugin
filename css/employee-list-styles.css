@@ -1,32 +1,54 @@
+/* Employee List Styling*/
 .employee-list-table {
     background-color: #0b0736;
     color: white;
+    margin-left: 20%;
 }
 
-.emp_heading{
-    margin-left: 25%;
+.Emp-list-heading{
+    margin-left: 45%;
     color: #244d68;
 
 }
 
-.add_employee_style{
+
+
+/*ADD Employee Styling*/
+
+.add-employee-style{
     margin-top: 40px;
+    margin-left:25%;
     width: 400px;
     background-color: #0b0736;
     color: white;
-    padding: 2px 2px 2px 10px;
+    padding: 10px;
+
     
 }
 
-.btn_style{
-    background-color: 7a74bf;
-    color: white;
-    font-size: 14px;
-    border-radius: 13px;
-}
-.lable_style{
-    width: 50px;
+h1.add-emp-title {
+        color: white;
+        padding: 2px 12px;
+        font-weight: bold;
+        margin-left: 22%;
+    }
+
+.employee-input-field{
+    justify-content: space-between;
+    display: flex;
+    margin: 10px;
 }
 
-.input_box_style{
+.input-box-style{
+    width: 200px;
+    margin-right: 10px;
 }
+
+button.btn-style {
+    color: white;
+    background-color: #7a74bf;
+    padding: 6px 24px;
+    border-radius: 15px;
+    margin-left: 310px;
+}
+

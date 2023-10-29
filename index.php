@@ -90,37 +90,42 @@ function ems_add_callback()
 
 
 
-    <h1> Add Employee </h1>
-    <form method="post" style="margin-top: 40px;" class="add_employee_style">
 
-        <p>
-            <label class="lable_style">EMP ID</label>
-            <input class="input_box_style" type="text" name="emp_id" placeholder="Enter ID" required>
 
-        </p>
+    <form method="post" class="add-employee-style">
+        <h1 class="add-emp-title"> Add Employee </h1>
 
-        <p>
-            <label class="lable_style">Name</label>
-            <input class="input_box_style" type="text" name="emp_name" placeholder="Enter Name" required>
+        <div class="employee-input-field">
+            <label class="lable-style">EMP ID</label>
+            <input class="input-box-style" type="text" name="emp_id" placeholder="Enter ID" required>
+        </div>
 
-        </p>
-        <p>
-            <label class="lable_style">Email</label>
-            <input class="input_box_style" type="email" name="emp_email" placeholder="Enter Email" required>
-        </p>
-        <p>
-            <label class="lable_style">Department</label>
-            <input class="input_box_style" type="text" name="emp_dept" placeholder="Enter Department" required>
-        </p>
+        <div class="employee-input-field">
+            <label class="lable-style">Name</label>
+            <input class="input-box-style" type="text" name="emp_name" placeholder="Enter Name" required>
+        </div>
 
-        <p>
-            <label class="lable_style">Date</label>
-            <input class="input_box_style" type="date" name="emp_date" required>
-        </p>
 
-        <p>
-            <button class="btn_style" type="submit" name="submit">Submit</button>
-        </p>
+        <div class="employee-input-field">
+            <label class="lable-style">Email</label>
+            <input class="input-box-style" type="email" name="emp_email" placeholder="Enter Email" required>
+        </div>
+
+        <div class="employee-input-field">
+            <label class="lable-style">Department</label>
+            <input class="input-box-style" type="text" name="emp_dept" placeholder="Enter Department" required>
+        </div>
+
+        <div class="employee-input-field">
+            <label class="lable-style">Date</label>
+            <input class="input-box-style" type="date" name="emp_date" required>
+        </div>
+
+        <div class="employee-submit-btn">
+            <button class="btn-style" type="submit" name="submit">Add</button>
+
+        </div>
+
     </form>
     <?php }
 
@@ -132,7 +137,7 @@ function ems_list_callback()
     $employee_list = $wpdb->get_results($wpdb->prepare("select * FROM $table_name", ""), ARRAY_A);
     if (count($employee_list) > 0) : ?>
         <div style="margin-top: 40px;">
-            <h1 class="emp_heading"> Employee List</h1>
+            <h1 class="Emp-list-heading"> Employee List</h1>
             <table class="employee-list-table" border="1" cellpadding="10">
                 <tr>
                     <th>S.No.</th>
