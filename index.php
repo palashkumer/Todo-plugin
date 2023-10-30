@@ -2,79 +2,72 @@
 
 /**
  * Plugin Name: A Simple Custom EMS
- * Description: This is for employee management system where you can create ,read , update & delete employee.
+ * Description: This is an employee management system where you can create, read, update, and delete employees.
  * Version: 1.0.0
  * Author: Palash Kumer
  * Author URI: https://github.com/palashkumer
  */
 
-// function enqueue_employee_list_styles()
-// {
-//     wp_enqueue_style('employee-list-styles', plugins_url('css/employee-list-styles.css', __FILE__));
-// }
-
-// add_action('admin_enqueue_scripts', 'enqueue_employee_list_styles');
-
-
-
-
-register_activation_hook(__FILE__, 'table_creator');
-function table_creator()
+register_activation_hook(__FILE__, 'ems_table_creator');
+function ems_table_creator()
 {
     global $wpdb;
     $charset_collate = $wpdb->get_charset_collate();
     $table_name = $wpdb->prefix . 'ems';
-    $sql = "DROP TABLE IF EXISTS $table_name;
-            CREATE TABLE $table_name(
-            id mediumint(11) NOT NULL AUTO_INCREMENT,
-            emp_id varchar(50) NOT NULL,
-            emp_name varchar (250) NOT NULL,
-            emp_email varchar (250) NOT NULL,
-            emp_dept varchar (250) NOT NULL,
-            emp_date date NOT NULL,
-            PRIMARY KEY id(id)
-            )$charset_collate;";
+    $sql = "CREATE TABLE $table_name (
+        id mediumint(11) NOT NULL AUTO_INCREMENT,
+        emp_id varchar(50) NOT NULL,
+        emp_name varchar(250) NOT NULL,
+        emp_email varchar(250) NOT NULL,
+        emp_dept varchar(250) NOT NULL,
+        emp_date date NOT NULL,
+        PRIMARY KEY (id)
+    ) $charset_collate;";
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
     dbDelta($sql);
 }
 
-add_action('admin_menu', 'display_esm_menu');
-function  display_esm_menu()
+add_action('admin_menu', 'ems_display_menu');
+function ems_display_menu()
 {
-
     add_menu_page('EMS', 'EMS', 'manage_options', 'emp-list', 'ems_list_callback', '', 5);
     add_submenu_page('emp-list', 'Employee List', 'Employee List', 'manage_options', 'emp-list', 'ems_list_callback');
     add_submenu_page('emp-list', 'Add Employee', 'Add Employee', 'manage_options', 'add-emp', 'ems_add_callback');
-
-    //Add Menu for Update
-    add_submenu_page(null, 'Update Employee', 'Update Employee', 'manage_options', 'update-emp', 'emp_update_call');
-
-    //Add Menu for  Delete
-    add_submenu_page(null, 'Delete Employee', 'Delete Employee', 'manage_options', 'delete-emp', 'emp_delete_call');
+    add_submenu_page(null, 'Update Employee', 'Update Employee', 'manage_options', 'update-emp', 'ems_update_callback');
+    add_submenu_page(null, 'Delete Employee', 'Delete Employee', 'manage_options', 'delete-emp', 'ems_delete_callback');
 }
 
-function enqueue_employee_table_styles()
+function ems_enqueue_styles()
 {
     wp_enqueue_style('employee-table-styles', plugin_dir_url(__FILE__) . 'css/employee-list-styles.css');
 }
-add_action('admin_enqueue_scripts', 'enqueue_employee_table_styles');
+add_action('admin_enqueue_scripts', 'ems_enqueue_styles');
+add_action('wp_enqueue_scripts', 'ems_enqueue_styles');
 
 function ems_add_callback()
 {
     global $wpdb;
     $table_name = $wpdb->prefix . 'ems';
     $msg = '';
-    if (isset($_REQUEST['submit'])) {
 
-        $wpdb->insert("$table_name", [
-            "emp_id" => $_REQUEST['emp_id'],
-            'emp_name' => $_REQUEST['emp_name'],
-            'emp_email' => $_REQUEST['emp_email'],
-            'emp_dept' => $_REQUEST['emp_dept'],
-            'emp_date' => $_REQUEST['emp_date'],
+    if (isset($_POST['submit'])) {
+        $emp_id = sanitize_text_field($_POST['emp_id']);
+        $emp_name = sanitize_text_field($_POST['emp_name']);
+        $emp_email = sanitize_email($_POST['emp_email']);
+        $emp_dept = sanitize_text_field($_POST['emp_dept']);
+        $emp_date = sanitize_text_field($_POST['emp_date']);
 
-        ]);
-
+        $wpdb->insert(
+            $table_name,
+            array(
+                'emp_id' => $emp_id,
+                'emp_name' => $emp_name,
+                'emp_email' => $emp_email,
+                'emp_dept' => $emp_dept,
+                'emp_date' => $emp_date,
+            ),
+            array('%s', '%s', '%s', '%s', '%s')
+        );
 
         if ($wpdb->insert_id > 0) {
             $msg = "Data Saved Successfully";
@@ -82,62 +75,51 @@ function ems_add_callback()
             $msg = "Failed to save data";
         }
     }
-
-
-
 ?>
     <h4 id="msg"><?php echo $msg; ?></h4>
-
-
-
-
-
     <form method="post" class="add-employee-style">
-        <h1 class="add-emp-title"> Add Employee </h1>
-
+        <div>
+            <h1 class="add-emp-title">Add Employee</h1>
+        </div>
         <div class="employee-input-field">
             <label class="lable-style">EMP ID</label>
             <input class="input-box-style" type="text" name="emp_id" placeholder="Enter ID" required>
         </div>
-
         <div class="employee-input-field">
             <label class="lable-style">Name</label>
             <input class="input-box-style" type="text" name="emp_name" placeholder="Enter Name" required>
         </div>
-
-
         <div class="employee-input-field">
             <label class="lable-style">Email</label>
             <input class="input-box-style" type="email" name="emp_email" placeholder="Enter Email" required>
         </div>
-
         <div class="employee-input-field">
             <label class="lable-style">Department</label>
             <input class="input-box-style" type="text" name="emp_dept" placeholder="Enter Department" required>
         </div>
-
         <div class="employee-input-field">
             <label class="lable-style">Date</label>
             <input class="input-box-style" type="date" name="emp_date" required>
         </div>
-
         <div class="employee-submit-btn">
             <button class="btn-style" type="submit" name="submit">Add</button>
-
         </div>
-
     </form>
-    <?php }
+    <?php
+}
 
 function ems_list_callback()
 {
-
     global $wpdb;
     $table_name = $wpdb->prefix . 'ems';
-    $employee_list = $wpdb->get_results($wpdb->prepare("select * FROM $table_name", ""), ARRAY_A);
-    if (count($employee_list) > 0) : ?>
+    $employee_list = $wpdb->get_results("SELECT * FROM $table_name", ARRAY_A);
+
+    if (count($employee_list) > 0) :
+    ?>
         <div style="margin-top: 40px;">
-            <h1 class="Emp-list-heading"> Employee List</h1>
+            <div>
+                <h1 class="emp-list-heading">Employee List</h1>
+            </div>
             <table class="employee-list-table" border="1" cellpadding="10">
                 <tr>
                     <th>S.No.</th>
@@ -146,12 +128,14 @@ function ems_list_callback()
                     <th>Email</th>
                     <th>Department</th>
                     <th>Date</th>
-                    <?php if (is_admin()) : ?>
+                    <?php if (current_user_can('manage_options')) : ?>
                         <th>Action</th>
                     <?php endif; ?>
                 </tr>
-                <?php $i = 1;
-                foreach ($employee_list as $index => $employee) : ?>
+                <?php
+                $i = 1;
+                foreach ($employee_list as $employee) :
+                ?>
                     <tr>
                         <td><?php echo $i++; ?></td>
                         <td><?php echo $employee['emp_id']; ?></td>
@@ -159,84 +143,104 @@ function ems_list_callback()
                         <td><?php echo $employee['emp_email']; ?></td>
                         <td><?php echo $employee['emp_dept']; ?></td>
                         <td><?php echo $employee['emp_date']; ?></td>
-                        <?php if (is_admin()) : ?>
+                        <?php if (current_user_can('manage_options')) : ?>
                             <td>
-                                <a href="admin.php?page=update-emp&id=<?php echo $employee['id']; ?>">Edit</a>
-                                <a href="admin.php?page=delete-emp&id=<?php echo $employee['id']; ?>">Delete</a>
+                                <a href="<?php echo admin_url('admin.php?page=update-emp&id=' . $employee['id']); ?>">Edit</a>
+                                <a href="<?php echo admin_url('admin.php?page=delete-emp&id=' . $employee['id']); ?>">Delete</a>
                             </td>
                         <?php endif; ?>
-
                     </tr>
                 <?php endforeach; ?>
             </table>
-
         </div>
-    <?php else : echo "<h2>Employee Record Not Found</h2>";
+    <?php
+    else :
+        echo "<h2>Employee Record Not Found</h2>";
     endif;
 }
 
-function emp_update_call()
+function ems_update_callback()
 {
     global $wpdb;
     $table_name = $wpdb->prefix . 'ems';
     $msg = '';
-    $id = isset($_REQUEST['id']) ? intval($_REQUEST['id']) : "";
-    if (isset($_REQUEST['update'])) {
+    $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+    if (isset($_POST['update'])) {
         if (!empty($id)) {
-            $wpdb->update("$table_name", ["emp_id" => $_REQUEST['emp_id'], 'emp_name' => $_REQUEST['emp_name'], 'emp_email' => $_REQUEST['emp_email'], 'emp_dept' => $_REQUEST['emp_dept'], 'emp_date' => $_REQUEST['emp_date']], ["id" => $id]);
+            $emp_id = sanitize_text_field($_POST['emp_id']);
+            $emp_name = sanitize_text_field($_POST['emp_name']);
+            $emp_email = sanitize_email($_POST['emp_email']);
+            $emp_dept = sanitize_text_field($_POST['emp_dept']);
+            $emp_date = sanitize_text_field($_POST['emp_date']);
+            $wpdb->update(
+                $table_name,
+                array(
+                    'emp_id' => $emp_id,
+                    'emp_name' => $emp_name,
+                    'emp_email' => $emp_email,
+                    'emp_dept' => $emp_dept,
+                    'emp_date' => $emp_date,
+                ),
+                array('id' => $id),
+                array('%s', '%s', '%s', '%s', '%s'),
+                array('%d')
+            );
             $msg = 'Data Updated Successfully';
         }
     }
-    $employee_details = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name where id = %d", $id), ARRAY_A); ?>
+    $employee_details = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE id = %d", $id), ARRAY_A);
+    ?>
     <h4><?php echo $msg; ?></h4>
-    <form method="post">
-        <p>
-            <label>EMP ID</label>
-            <input type="text" name="emp_id" placeholder="Enter ID" value="<?php echo $employee_details['emp_id']; ?>" required>
-        </p>
-
-        <p>
-            <label>Name</label>
-            <input type="text" name="emp_name" placeholder="Enter Name" value="<?php echo $employee_details['emp_name']; ?>" required>
-        </p>
-        <p>
-            <label>Email</label>
-            <input type="email" name="emp_email" placeholder="Enter Email" value="<?php echo $employee_details['emp_email']; ?>" required>
-        </p>
-        <p>
-            <label>Department</label>
-            <input type="text" name="emp_dept" placeholder="Enter Department" value="<?php echo $employee_details['emp_dept']; ?>" required>
-        </p>
-        <p>
-            <label>Date</label>
-            <input type="date" name="emp_date" value="<?php echo $employee_details['emp_date']; ?>" required>
-        </p>
-        <p>
-            <button type="submit" name="update">Update</button>
-        </p>
+    <form method="post" class="add-employee-style">
+        <div>
+            <h1 class="add-emp-title">Edit Employee</h1>
+        </div>
+        <div class="employee-input-field">
+            <label class="lable-style">EMP ID</label>
+            <input class="input-box-style" type="text" name="emp_id" placeholder="Enter ID" value="<?php echo $employee_details['emp_id']; ?>" required>
+        </div>
+        <div class="employee-input-field">
+            <label class="lable-style">Name</label>
+            <input class="input-box-style" type="text" name="emp_name" placeholder="Enter Name" value="<?php echo $employee_details['emp_name']; ?>" required>
+        </div>
+        <div class="employee-input-field">
+            <label class="lable-style">Email</label>
+            <input class="input-box-style" type="email" name="emp_email" placeholder="Enter Email" value="<?php echo $employee_details['emp_email']; ?>" required>
+        </div>
+        <div class="employee-input-field">
+            <label class="lable-style">Department</label>
+            <input class="input-box-style" type="text" name="emp_dept" placeholder="Enter Department" value="<?php echo $employee_details['emp_dept']; ?>" required>
+        </div>
+        <div class="employee-input-field">
+            <label class="lable-style">Date</label>
+            <input class="input-box-style" type="date" name="emp_date" value="<?php echo $employee_details['emp_date']; ?>" required>
+        </div>
+        <div class="employee-submit-btn">
+            <button class="btn-style" type="submit" name="update">Update</button>
+        </div>
     </form>
-    <?php }
+<?php
+}
 
-
-function emp_delete_call()
+function ems_delete_callback()
 {
     global $wpdb;
     $table_name = $wpdb->prefix . 'ems';
-    $id = isset($_REQUEST['id']) ? intval($_REQUEST['id']) : "";
-    if (isset($_REQUEST['delete'])) {
-        if ($_REQUEST['conf'] == 'yes') {
-            $row_exits = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE id = %d", $id), ARRAY_A);
-            if (count($row_exits) > 0) {
-                $wpdb->delete("$table_name", array('id' => $id,));
-            }
-        } ?>
-        <script>
-            location.href = "<?php echo site_url(); ?>/wp-admin/admin.php?page=emp-list";
-        </script>
-    <?php } ?>
+    $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+    $msg = '';
+
+    if (isset($_POST['delete'])) {
+        $confirmation = sanitize_text_field($_POST['conf']);
+        if ($confirmation === 'yes' && $id > 0) {
+            $wpdb->delete($table_name, array('id' => $id), array('%d'));
+            $msg = 'Data Deleted Successfully';
+        }
+    }
+?>
+    <h4><?php echo $msg; ?></h4>
     <form method="post">
         <p>
-            <label>Are you sure want delete?</label><br>
+            <label>Are you sure you want to delete?</label><br>
             <input type="radio" name="conf" value="yes">Yes
             <input type="radio" name="conf" value="no" checked>No
         </p>
@@ -245,9 +249,8 @@ function emp_delete_call()
             <input type="hidden" name="id" value="<?php echo $id; ?>">
         </p>
     </form>
-
-
 <?php
-
-
 }
+
+//Add Shortcode
+add_shortcode('employee_list', 'ems_list_callback');

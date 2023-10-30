@@ -2,19 +2,18 @@
 .employee-list-table {
     background-color: #0b0736;
     color: white;
-    margin-left: 20%;
+    margin-left: 24%;
 }
 
-.Emp-list-heading{
-    margin-left: 45%;
+
+h1.emp-list-heading {
     color: #244d68;
-
+    display: flex;
+    justify-content: center;
 }
-
 
 
 /*ADD Employee Styling*/
-
 .add-employee-style{
     margin-top: 40px;
     margin-left:25%;
@@ -30,7 +29,8 @@ h1.add-emp-title {
         color: white;
         padding: 2px 12px;
         font-weight: bold;
-        margin-left: 22%;
+        display: flex;
+        justify-content: center;
     }
 
 .employee-input-field{
