@@ -27,14 +27,31 @@ function ems_table_creator()
     dbDelta($sql);
 }
 
+function add_scripts()
+{
+    wp_enqueue_script('jquery');
+    wp_enqueue_script('validation-js', 'https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.20.0/jquery.validate.min.js', 'jquery', '1.20.0');
+}
+
+add_action('admin_enqueue_scripts', 'add_scripts');
+
 add_action('admin_menu', 'ems_display_menu');
 function ems_display_menu()
 {
-    add_menu_page('EMS', 'EMS', 'manage_options', 'emp-list', 'ems_list_callback', '', 5);
-    add_submenu_page('emp-list', 'Employee List', 'Employee List', 'manage_options', 'emp-list', 'ems_list_callback');
-    add_submenu_page('emp-list', 'Add Employee', 'Add Employee', 'manage_options', 'add-emp', 'ems_add_callback');
-    add_submenu_page(null, 'Update Employee', 'Update Employee', 'manage_options', 'update-emp', 'ems_update_callback');
-    add_submenu_page(null, 'Delete Employee', 'Delete Employee', 'manage_options', 'delete-emp', 'ems_delete_callback');
+    global $current_user;
+    // echo "<pre>";
+    // print_r($current_user);
+    $role = $current_user->roles;
+    // print_r($role);
+    // die;
+    $accepts_roles = array('contributor', 'editor', 'administrator', 'subscriber');
+    if (in_array($role[0], $accepts_roles)) {
+        add_menu_page('EMS', 'EMS', $role[0], 'emp-list', 'ems_list_callback', '', 5);
+        add_submenu_page('emp-list', 'Employee List', 'Employee List', $role[0], 'emp-list', 'ems_list_callback');
+        add_submenu_page('emp-list', 'Add Employee', 'Add Employee', $role[0], 'add-emp', 'ems_add_callback');
+        add_submenu_page(null, 'Update Employee', 'Update Employee', $role[0], 'update-emp', 'ems_update_callback');
+        add_submenu_page(null, 'Delete Employee', 'Delete Employee', $role[0], 'delete-emp', 'ems_delete_callback');
+    }
 }
 
 function ems_enqueue_styles()
@@ -51,6 +68,7 @@ function ems_add_callback()
     $msg = '';
 
     if (isset($_POST['submit'])) {
+
         $emp_id = sanitize_text_field($_POST['emp_id']);
         $emp_name = sanitize_text_field($_POST['emp_name']);
         $emp_email = sanitize_email($_POST['emp_email']);
@@ -77,7 +95,7 @@ function ems_add_callback()
     }
 ?>
     <h4 id="msg"><?php echo $msg; ?></h4>
-    <form method="post" class="add-employee-style">
+    <form method="post" class="add-employee-style" id="emsform">
         <div>
             <h1 class="add-emp-title">Add Employee</h1>
         </div>
@@ -105,6 +123,34 @@ function ems_add_callback()
             <button class="btn-style" type="submit" name="submit">Add</button>
         </div>
     </form>
+
+
+    //client site validation
+
+    <script>
+        JQuery(function() {
+            JQuery('#emsform').validate({
+
+                rules: {
+                    emp_id: {
+                        required: true,
+                        number: true
+                    },
+                    emp_name: {
+                        required: true,
+
+                    },
+                    emp_email: {
+                        required: true,
+                    },
+                    emp_dept: {
+                        required: true,
+                    }
+                }
+            });
+
+        });
+    </script>
     <?php
 }
 
@@ -239,15 +285,15 @@ function ems_delete_callback()
 ?>
     <h4><?php echo $msg; ?></h4>
     <form method="post">
-        <p>
+        <div>
             <label>Are you sure you want to delete?</label><br>
             <input type="radio" name="conf" value="yes">Yes
             <input type="radio" name="conf" value="no" checked>No
-        </p>
-        <p>
+        </div>
+        <div>
             <button type="submit" name="delete">Delete</button>
             <input type="hidden" name="id" value="<?php echo $id; ?>">
-        </p>
+        </div>
     </form>
 <?php
 }
