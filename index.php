@@ -39,10 +39,8 @@ add_action('admin_menu', 'ems_display_menu');
 function ems_display_menu()
 {
     global $current_user;
-    // echo "<pre>";
     // print_r($current_user);
     $role = $current_user->roles;
-    // print_r($role);
     $accepts_roles = array('contributor', 'editor', 'administrator', 'subscriber');
     if (in_array($role[0], $accepts_roles)) {
         add_menu_page('EMS', 'EMS', $role[0], 'emp-list', 'ems_list_callback', '', 5);
@@ -68,6 +66,7 @@ function ems_add_callback()
 
     if (isset($_POST['submit'])) {
 
+        //Sanitization input fields
         $emp_id = sanitize_text_field($_POST['emp_id']);
         $emp_name = sanitize_text_field($_POST['emp_name']);
         $emp_email = sanitize_email($_POST['emp_email']);
