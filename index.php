@@ -27,13 +27,23 @@ function ems_table_creator()
     dbDelta($sql);
 }
 
-function add_scripts()
+// Enqueue scripts for admin page
+function add_employee_scripts()
 {
-    wp_enqueue_script('jquery');
-    wp_enqueue_script('validation-js', 'https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.20.0/jquery.validate.min.js', 'jquery', '1.20.0');
+    wp_enqueue_script('validation-js', 'https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.20.0/jquery.validate.min.js', array('jquery'), '1.20.0');
+    wp_enqueue_script('employee-scripts', plugin_dir_url(__FILE__) . 'assets/employee-scripts.js', array('jquery'), true);
+    
+    $ajax_nonce = wp_create_nonce('employee_scripts_nonce');
+    wp_localize_script('employee-scripts', 'myAjax', array(
+        'ajaxurl' => admin_url('admin-ajax.php'), 
+        'nonce' => $ajax_nonce, 
+    ));
 }
 
-add_action('admin_enqueue_scripts', 'add_scripts');
+add_action('admin_enqueue_scripts', 'add_employee_scripts');
+add_action('wp_enqueue_scripts', 'add_employee_scripts');
+
+
 
 add_action('admin_menu', 'ems_display_menu');
 function ems_display_menu()
@@ -45,7 +55,7 @@ function ems_display_menu()
     if (in_array($role[0], $accepts_roles)) {
         add_menu_page('EMS', 'EMS', $role[0], 'emp-list', 'ems_list_callback', '', 5);
         add_submenu_page('emp-list', 'Employee List', 'Employee List', $role[0], 'emp-list', 'ems_list_callback');
-        add_submenu_page('emp-list', 'Add Employee', 'Add Employee', $role[0], 'add-emp', 'ems_add_callback');
+        add_submenu_page('emp-list', 'Add Employee', 'Add Employee', $role[0], 'add-emp', 'ems_add_form_callback');
         add_submenu_page(null, 'Update Employee', 'Update Employee', $role[0], 'update-emp', 'ems_update_callback');
         add_submenu_page(null, 'Delete Employee', 'Delete Employee', $role[0], 'delete-emp', 'ems_delete_callback');
     }
@@ -58,20 +68,19 @@ function ems_enqueue_styles()
 add_action('admin_enqueue_scripts', 'ems_enqueue_styles');
 add_action('wp_enqueue_scripts', 'ems_enqueue_styles');
 
-function ems_add_callback()
-{
+function ems_add_callback(){
     global $wpdb;
     $table_name = $wpdb->prefix . 'ems';
     $msg = '';
-
-    if (isset($_POST['submit'])) {
-
+    error_log(print_r($_POST,1));
+    if (isset($_POST["emp_data"])) {
+        $emp_data = $_POST["emp_data"];
         //Sanitization input fields
-        $emp_id = sanitize_text_field($_POST['emp_id']);
-        $emp_name = sanitize_text_field($_POST['emp_name']);
-        $emp_email = sanitize_email($_POST['emp_email']);
-        $emp_dept = sanitize_text_field($_POST['emp_dept']);
-        $emp_date = sanitize_text_field($_POST['emp_date']);
+        $emp_id = sanitize_text_field($emp_data['emp_id']);
+        $emp_name = sanitize_text_field($emp_data['emp_name']);
+        $emp_email = sanitize_email($emp_data['emp_email']);
+        $emp_dept = sanitize_text_field($emp_data['emp_dept']);
+        $emp_date = sanitize_text_field($emp_data['emp_date']);
 
         $wpdb->insert(
             $table_name,
@@ -91,61 +100,41 @@ function ems_add_callback()
             $msg = "Failed to save data";
         }
     }
-?>
-    <h4 id="msg"><?php echo $msg; ?></h4>
+    wp_send_json_success($msg);
+}
+function ems_add_form_callback()
+{
+
+    ?>
     <form method="post" class="add-employee-style" id="emsform">
         <div>
             <h1 class="add-emp-title">Add Employee</h1>
         </div>
         <div class="employee-input-field">
             <label class="lable-style">EMP ID</label>
-            <input class="input-box-style" type="text" name="emp_id" placeholder="Enter ID" required>
+            <input class="input-box-style" id="emp_id" type="text" name="emp_id" placeholder="Enter ID" required>
         </div>
         <div class="employee-input-field">
             <label class="lable-style">Name</label>
-            <input class="input-box-style" type="text" name="emp_name" placeholder="Enter Name" required>
+            <input class="input-box-style" type="text" id="emp_name" name="emp_name" placeholder="Enter Name" required>
         </div>
         <div class="employee-input-field">
             <label class="lable-style">Email</label>
-            <input class="input-box-style" type="email" name="emp_email" placeholder="Enter Email" required>
+            <input class="input-box-style" type="email" id="emp_email" name="emp_email" placeholder="Enter Email" required>
         </div>
         <div class="employee-input-field">
             <label class="lable-style">Department</label>
-            <input class="input-box-style" type="text" name="emp_dept" placeholder="Enter Department" required>
+            <input class="input-box-style" type="text" id="emp_dept" name="emp_dept" placeholder="Enter Department" required>
         </div>
         <div class="employee-input-field">
             <label class="lable-style">Date</label>
-            <input class="input-box-style" type="date" name="emp_date" required>
+            <input class="input-box-style" type="date" id="emp_date" name="emp_date" required>
         </div>
         <div class="employee-submit-btn">
             <button class="btn-style" type="submit" name="submit">Add</button>
         </div>
     </form>
 
-    <script>
-        JQuery(function() {
-            JQuery('#emsform').validate({
-
-                rules: {
-                    emp_id: {
-                        required: true,
-                        number: true
-                    },
-                    emp_name: {
-                        required: true,
-
-                    },
-                    emp_email: {
-                        required: true,
-                    },
-                    emp_dept: {
-                        required: true,
-                    }
-                }
-            });
-
-        });
-    </script>
     <?php
 }
 
@@ -155,8 +144,8 @@ function ems_list_callback()
     $table_name = $wpdb->prefix . 'ems';
     $employee_list = $wpdb->get_results("SELECT * FROM $table_name", ARRAY_A);
 
-    if (count($employee_list) > 0) :
-    ?>
+    if (count($employee_list) > 0):
+        ?>
         <div style="margin-top: 40px;">
             <div>
                 <h1 class="emp-list-heading">Employee List</h1>
@@ -169,33 +158,47 @@ function ems_list_callback()
                     <th>Email</th>
                     <th>Department</th>
                     <th>Date</th>
-                    <?php if (current_user_can('manage_options')) : ?>
+                    <?php if (current_user_can('manage_options')): ?>
                         <th>Action</th>
                     <?php endif; ?>
                 </tr>
                 <?php
                 $i = 1;
-                foreach ($employee_list as $employee) :
-                ?>
+                foreach ($employee_list as $employee):
+                    ?>
                     <tr>
-                        <td><?php echo $i++; ?></td>
-                        <td><?php echo $employee['emp_id']; ?></td>
-                        <td><?php echo $employee['emp_name']; ?></td>
-                        <td><?php echo $employee['emp_email']; ?></td>
-                        <td><?php echo $employee['emp_dept']; ?></td>
-                        <td><?php echo $employee['emp_date']; ?></td>
-                        <?php if (current_user_can('manage_options')) : ?>
+                        <td>
+                            <?php echo $i++; ?>
+                        </td>
+                        <td>
+                            <?php echo $employee['emp_id']; ?>
+                        </td>
+                        <td>
+                            <?php echo $employee['emp_name']; ?>
+                        </td>
+                        <td>
+                            <?php echo $employee['emp_email']; ?>
+                        </td>
+                        <td>
+                            <?php echo $employee['emp_dept']; ?>
+                        </td>
+                        <td>
+                            <?php echo $employee['emp_date']; ?>
+                        </td>
+                        <?php if (current_user_can('manage_options')): ?>
                             <td>
-                                <a href="<?php echo admin_url('admin.php?page=update-emp&id=' . $employee['id']); ?>">Edit</a>
-                                <a href="<?php echo admin_url('admin.php?page=delete-emp&id=' . $employee['id']); ?>">Delete</a>
+                                <a href="<?php echo admin_url('admin.php?page=update-emp&id=' . $employee['id']); ?>"
+                                    class="btn-success">Edit</a>
+                                <a href="<?php echo admin_url('admin.php?page=delete-emp&id=' . $employee['id']); ?>"
+                                    class="btn-danger btn-del">Delete</a>
                             </td>
                         <?php endif; ?>
                     </tr>
                 <?php endforeach; ?>
             </table>
         </div>
-    <?php
-    else :
+        <?php
+    else:
         echo "<h2>Employee Record Not Found</h2>";
     endif;
 }
@@ -231,38 +234,46 @@ function ems_update_callback()
     }
     $employee_details = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE id = %d", $id), ARRAY_A);
     ?>
-    <h4><?php echo $msg; ?></h4>
+    <h4>
+        <?php echo $msg; ?>
+    </h4>
     <form method="post" class="add-employee-style">
         <div>
             <h1 class="add-emp-title">Edit Employee</h1>
         </div>
         <div class="employee-input-field">
             <label class="lable-style">EMP ID</label>
-            <input class="input-box-style" type="text" name="emp_id" placeholder="Enter ID" value="<?php echo $employee_details['emp_id']; ?>" required>
+            <input class="input-box-style" type="text" id ="emp_id" name="emp_id" placeholder="Enter ID"
+                value="<?php echo $employee_details['emp_id']; ?>" required>
         </div>
         <div class="employee-input-field">
             <label class="lable-style">Name</label>
-            <input class="input-box-style" type="text" name="emp_name" placeholder="Enter Name" value="<?php echo $employee_details['emp_name']; ?>" required>
+            <input class="input-box-style"  id ="emp_name" type="text" name="emp_name" placeholder="Enter Name"
+                value="<?php echo $employee_details['emp_name']; ?>" required>
         </div>
         <div class="employee-input-field">
             <label class="lable-style">Email</label>
-            <input class="input-box-style" type="email" name="emp_email" placeholder="Enter Email" value="<?php echo $employee_details['emp_email']; ?>" required>
+            <input class="input-box-style"  id ="emp_email" type="email" name="emp_email" placeholder="Enter Email"
+                value="<?php echo $employee_details['emp_email']; ?>" required>
         </div>
         <div class="employee-input-field">
             <label class="lable-style">Department</label>
-            <input class="input-box-style" type="text" name="emp_dept" placeholder="Enter Department" value="<?php echo $employee_details['emp_dept']; ?>" required>
+            <input class="input-box-style"  id ="emp_dept" type="text" name="emp_dept" placeholder="Enter Department"
+                value="<?php echo $employee_details['emp_dept']; ?>" required>
         </div>
         <div class="employee-input-field">
             <label class="lable-style">Date</label>
-            <input class="input-box-style" type="date" name="emp_date" value="<?php echo $employee_details['emp_date']; ?>" required>
+            <input class="input-box-style"  id ="emp_date" type="date" name="emp_date" value="<?php echo $employee_details['emp_date']; ?>"
+                required>
         </div>
         <div class="employee-submit-btn">
-            <button class="btn-style" type="submit" name="update">Update</button>
+            <button class="btn-style " type="submit" name="update">Update</button>
         </div>
     </form>
-<?php
+    <?php
 }
 
+// Delete Method
 function ems_delete_callback()
 {
     global $wpdb;
@@ -277,8 +288,10 @@ function ems_delete_callback()
             $msg = 'Data Deleted Successfully';
         }
     }
-?>
-    <h4><?php echo $msg; ?></h4>
+    ?>
+    <h4>
+        <?php echo $msg; ?>
+    </h4>
     <form method="post">
         <div>
             <label>Are you sure you want to delete?</label><br>
@@ -290,8 +303,26 @@ function ems_delete_callback()
             <input type="hidden" name="id" value="<?php echo $id; ?>">
         </div>
     </form>
-<?php
+    <?php
 }
 
 //Add Shortcode
 add_shortcode('employee_list', 'ems_list_callback');
+
+// ajax testing
+function ajax_method_testing()
+{
+
+    check_ajax_referer('employee_scripts_nonce', 'security');
+
+    $emp_data = $_POST["emp_data"];
+
+    
+
+    // error_log(print_r($emp_data, 1));
+    // error_log($emp_data['emp_id']);
+}
+add_action("wp_ajax_ajax_method_testing", "ajax_method_testing");
+add_action("wp_ajax_ems_add_callback", "ems_add_callback");
+add_action("wp_ajax_ems_delete_callback", "ems_delete_callback");
+
