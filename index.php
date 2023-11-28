@@ -56,7 +56,7 @@ function ems_display_menu()
         add_menu_page('EMS', 'EMS', $role[0], 'emp-list', 'ems_list_callback', '', 5);
         add_submenu_page('emp-list', 'Employee List', 'Employee List', $role[0], 'emp-list', 'ems_list_callback');
         add_submenu_page('emp-list', 'Add Employee', 'Add Employee', $role[0], 'add-emp', 'ems_add_form_callback');
-        add_submenu_page(null, 'Update Employee', 'Update Employee', $role[0], 'update-emp', 'ems_update_callback');
+        add_submenu_page(null, 'Update Employee', 'Update Employee', $role[0], 'update-emp', 'ems_update_form_callback');
         add_submenu_page(null, 'Delete Employee', 'Delete Employee', $role[0], 'delete-emp', 'ems_delete_callback');
     }
 }
@@ -72,7 +72,6 @@ function ems_add_callback(){
     global $wpdb;
     $table_name = $wpdb->prefix . 'ems';
     $msg = '';
-    error_log(print_r($_POST,1));
     if (isset($_POST["emp_data"])) {
         $emp_data = $_POST["emp_data"];
         //Sanitization input fields
@@ -131,7 +130,7 @@ function ems_add_form_callback()
             <input class="input-box-style" type="date" id="emp_date" name="emp_date" required>
         </div>
         <div class="employee-submit-btn">
-            <button class="btn-style" type="submit" name="submit">Add</button>
+            <button class="btn-style add-btn" type="submit" name="submit">Add</button>
         </div>
     </form>
 
@@ -163,34 +162,34 @@ function ems_list_callback()
                     <?php endif; ?>
                 </tr>
                 <?php
-                $i = 1;
+        
                 foreach ($employee_list as $employee):
                     ?>
                     <tr>
-                        <td>
-                            <?php echo $i++; ?>
+                        <td class="emp_uid">
+                            <?php echo $employee['id']; ?>
                         </td>
-                        <td>
+                        <td class="emp_uid">
                             <?php echo $employee['emp_id']; ?>
                         </td>
-                        <td>
+                        <td class="emp_uid">
                             <?php echo $employee['emp_name']; ?>
                         </td>
-                        <td>
+                        <td class="emp_uid">
                             <?php echo $employee['emp_email']; ?>
                         </td>
-                        <td>
+                        <td class="emp_uid">
                             <?php echo $employee['emp_dept']; ?>
                         </td>
-                        <td>
+                        <td class="emp_uid">
                             <?php echo $employee['emp_date']; ?>
                         </td>
                         <?php if (current_user_can('manage_options')): ?>
-                            <td>
-                                <a href="<?php echo admin_url('admin.php?page=update-emp&id=' . $employee['id']); ?>"
+                            <td class="emp_table_data_action">
+                            <a href="<?php echo admin_url('admin.php?page=update-emp&id=' . $employee['id']); ?>"
                                     class="btn-success">Edit</a>
-                                <a href="<?php echo admin_url('admin.php?page=delete-emp&id=' . $employee['id']); ?>"
-                                    class="btn-danger btn-del">Delete</a>
+                                <button data-id="<?php echo $employee['id'] ?>"  class="btn-danger emp-data-delete">Delete </button>
+                                
                             </td>
                         <?php endif; ?>
                     </tr>
@@ -203,19 +202,23 @@ function ems_list_callback()
     endif;
 }
 
-function ems_update_callback()
-{
+function ems_update_callback(){
+    error_log(print_r($_POST['emp_data'],1));
+    
     global $wpdb;
     $table_name = $wpdb->prefix . 'ems';
     $msg = '';
-    $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
-    if (isset($_POST['update'])) {
+    $employee_data = $_POST['emp_data'];
+    $id = isset($employee_data['id']) ? intval($employee_data['id']) : 0;
+
+
+    if (isset($employee_data['id'])) {
         if (!empty($id)) {
-            $emp_id = sanitize_text_field($_POST['emp_id']);
-            $emp_name = sanitize_text_field($_POST['emp_name']);
-            $emp_email = sanitize_email($_POST['emp_email']);
-            $emp_dept = sanitize_text_field($_POST['emp_dept']);
-            $emp_date = sanitize_text_field($_POST['emp_date']);
+            $emp_id = sanitize_text_field($employee_data['emp_id']);
+            $emp_name = sanitize_text_field($employee_data['emp_name']);
+            $emp_email = sanitize_email($employee_data['emp_email']);
+            $emp_dept = sanitize_text_field($employee_data['emp_dept']);
+            $emp_date = sanitize_text_field($employee_data['emp_date']);
             $wpdb->update(
                 $table_name,
                 array(
@@ -231,12 +234,18 @@ function ems_update_callback()
             );
             $msg = 'Data Updated Successfully';
         }
+        wp_send_json_success($msg);
     }
+}
+function ems_update_form_callback()
+{
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'ems';
+    $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+
     $employee_details = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE id = %d", $id), ARRAY_A);
     ?>
-    <h4>
-        <?php echo $msg; ?>
-    </h4>
+
     <form method="post" class="add-employee-style">
         <div>
             <h1 class="add-emp-title">Edit Employee</h1>
@@ -267,43 +276,33 @@ function ems_update_callback()
                 required>
         </div>
         <div class="employee-submit-btn">
-            <button class="btn-style " type="submit" name="update">Update</button>
+            <button class="btn-style update-btn" data-id="<?php echo $id ?>" type="submit" name="update">Update</button>
         </div>
     </form>
     <?php
 }
 
+
 // Delete Method
 function ems_delete_callback()
 {
+    check_ajax_referer('employee_scripts_nonce', 'nonce');
+    error_log(print_r($_POST, true));
     global $wpdb;
     $table_name = $wpdb->prefix . 'ems';
-    $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+    $id = isset($_POST['emp_id']) ? intval($_POST['emp_id']) : 0;
     $msg = '';
 
-    if (isset($_POST['delete'])) {
+    if (isset($id)) {
         $confirmation = sanitize_text_field($_POST['conf']);
         if ($confirmation === 'yes' && $id > 0) {
             $wpdb->delete($table_name, array('id' => $id), array('%d'));
             $msg = 'Data Deleted Successfully';
+        }else{
+            $msg = "Deletion Failed";
         }
     }
-    ?>
-    <h4>
-        <?php echo $msg; ?>
-    </h4>
-    <form method="post">
-        <div>
-            <label>Are you sure you want to delete?</label><br>
-            <input type="radio" name="conf" value="yes">Yes
-            <input type="radio" name="conf" value="no" checked>No
-        </div>
-        <div>
-            <button type="submit" name="delete">Delete</button>
-            <input type="hidden" name="id" value="<?php echo $id; ?>">
-        </div>
-    </form>
-    <?php
+    wp_send_json_success($msg);
 }
 
 //Add Shortcode
@@ -318,11 +317,9 @@ function ajax_method_testing()
     $emp_data = $_POST["emp_data"];
 
     
-
-    // error_log(print_r($emp_data, 1));
-    // error_log($emp_data['emp_id']);
 }
 add_action("wp_ajax_ajax_method_testing", "ajax_method_testing");
 add_action("wp_ajax_ems_add_callback", "ems_add_callback");
 add_action("wp_ajax_ems_delete_callback", "ems_delete_callback");
-
+add_action("wp_ajax_ems_update_callback", "ems_update_callback");
+add_action('wp_ajax_ems_get_employee_details', 'ems_get_employee_details');
