@@ -9,4 +9,4 @@ Use the following git command to clone the repository. <br>
 <h2>Usage</h2>
 <h5>Short code</h5>
 For the plugin to easily access between pages and post shortcodes are used. For Todo-plugin plugin to have the ease of access the following shortcode need to be used. <br>
-[employee_list]
+`[employee_list]`
