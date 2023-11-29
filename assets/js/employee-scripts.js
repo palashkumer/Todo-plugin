@@ -1,4 +1,5 @@
 (function ($) {
+     // AJAX method for adding an employee
     function ajaxMethodCalling(emp_data) {
         jQuery.ajax({
             type: "post",
@@ -35,6 +36,8 @@
             }
         });
     }
+
+    // Document ready function for form validation
     $(document).ready(function () {
         $('#emsform').validate({
             rules: {
@@ -56,6 +59,8 @@
         });
     });
 
+
+    // Document ready function for adding an employee
     $(document).ready(function () {
 
         jQuery(".add-btn").click(function (e) {
@@ -81,7 +86,7 @@
 
         });
 
-          // Ajax Request for deleting data
+        // Ajax Request for deleting data
         $('.emp-data-delete').on('click', function () {
         // Use $(this) to refer to the current button element
         let $button = $(this)
@@ -114,6 +119,8 @@
         }
     });
   }
+
+  // Document ready function for editing an employee
   $(document).ready(function(){
     jQuery(".update-btn").click(function (e) {
         e.preventDefault();
@@ -135,15 +142,12 @@
                 emp_date: emp_date
             };
             ajaxEditMethodCalling(emp_data);
-        console.log(dataValue);
-        console.log(emp_data);
+            console.log(dataValue);
+            console.log(emp_data);
         
 
     });
   })
-
-
-
 })(jQuery);
 
 
