@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Plugin Name: A Simple Custom EMS
  * Description: This is an employee management system where you can create, read, update, and delete employees.
@@ -14,11 +13,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// include database file
-include_once(plugin_dir_path(__FILE__) . 'includes/database.php');
+/**
+ * Function to create the database table on plugin activation
+ */ 
+register_activation_hook(__FILE__, 'ems_table_creator');
 
 
-// Enqueue scripts for admin page
+// include ajax-functions file
+include_once(plugin_dir_path(__FILE__) . 'includes/ajax-functions.php');
+
+
+/**
+ * Enqueue scripts for admin page
+ */ 
 function add_employee_scripts()
 {
     // Enqueue jQuery validation and custom scripts
@@ -34,12 +41,16 @@ function add_employee_scripts()
     ));
 }
 
-// Add script enqueuing actions
+/**
+ *  Add script enqueuing actions
+ */
 add_action('admin_enqueue_scripts', 'add_employee_scripts');
 add_action('wp_enqueue_scripts', 'add_employee_scripts');
 
 
-// Add menu and submenus to the admin panel
+/**
+ * Add menu and submenus to the admin panel
+ */ 
 add_action('admin_menu', 'ems_display_menu');
 function ems_display_menu()
 {
@@ -57,8 +68,9 @@ function ems_display_menu()
 }
 
 
-
-// Enqueue styles for the admin page
+/**
+ * Enqueue styles for the admin page
+ */ 
 function ems_enqueue_styles()
 {
     wp_enqueue_style('employee-table-styles', plugin_dir_url(__FILE__) . 'assets/css/employee-list-styles.css');
@@ -67,10 +79,9 @@ add_action('admin_enqueue_scripts', 'ems_enqueue_styles');
 add_action('wp_enqueue_scripts', 'ems_enqueue_styles');
 
 
-
-
-
-// Callback for displaying the add employee form
+/**
+ *  Callback for displaying the add employee form
+ */
 function ems_add_form_callback()
 {
 
@@ -79,9 +90,15 @@ function ems_add_form_callback()
 }
 
 
-// Callback for displaying the employee list
+/**
+ * Callback for displaying the employee list
+ */ 
 function ems_list_callback()
 {
+
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'ems';
+    $employee_list = $wpdb->get_results("SELECT * FROM $table_name", ARRAY_A); 
 
     include(plugin_dir_path(__FILE__) . 'templates/employee-list.php');
 
@@ -89,11 +106,9 @@ function ems_list_callback()
 }
 
 
-// AJAX callback for updating an employee
-
-
-
-// Callback for displaying the update employee form
+/**
+ * Callback for displaying the update employee form
+ */ 
 function ems_update_form_callback()
 {
     global $wpdb;
@@ -111,24 +126,14 @@ function ems_update_form_callback()
 }
 
 
-// // AJAX callback for deleting an employee
-
-
-//Shortcode For displaying emp list in front end
+/**
+ * Shortcode For displaying emp list in front end
+ */
 add_shortcode('employee_list', 'ems_list_callback');
 
-// ajax testing method
-function ajax_method_testing()
-{
-
-    check_ajax_referer('employee_scripts_nonce', 'security');
-
-    // Retrieve employee data from the AJAX request
-    $emp_data = $_POST["emp_data"];
-
-    
-}
-add_action("wp_ajax_ajax_method_testing", "ajax_method_testing");
+/**
+ * hooks
+ */
 add_action("wp_ajax_ems_add_callback", "ems_add_callback");
 add_action("wp_ajax_ems_delete_callback", "ems_delete_callback");
 add_action("wp_ajax_ems_update_callback", "ems_update_callback");

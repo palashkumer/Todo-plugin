@@ -1,10 +1,9 @@
 <?php
- global $wpdb;
- $table_name = $wpdb->prefix . 'ems';
- $employee_list = $wpdb->get_results("SELECT * FROM $table_name", ARRAY_A);
+ 
 
-
- // Display the employee list in a table
+ /**
+  * Display the employee list in a table
+  */ 
  if (count($employee_list) > 0):
      ?>
      <div style="margin-top: 40px;">

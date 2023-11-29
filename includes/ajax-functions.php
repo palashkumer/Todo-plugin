@@ -1,10 +1,8 @@
 <?php
-// includes/database.php
 
-// Function to create the database table on plugin activation
-register_activation_hook(__FILE__, 'ems_table_creator');
-
-// Function to create the database table
+/**
+ * Function to create the database table
+ */ 
 function ems_table_creator() {
     global $wpdb;
 
@@ -26,7 +24,9 @@ function ems_table_creator() {
     dbDelta( $sql );
 }
 
-// AJAX callback for adding an employee
+/**
+ * Ajax callback function for adding an employee
+ */
 function ems_add_callback() {
     global $wpdb;
     $table_name = $wpdb->prefix . 'ems';
@@ -62,11 +62,13 @@ function ems_add_callback() {
         }
     }
 
-    // Send JSON response with the message
+    //Send JSON response with the message
     wp_send_json_success($msg);
 }
 
-// AJAX callback for updating an employee
+/**
+ * AJAX callback function for updating an employee
+ */
 function ems_update_callback() {
     global $wpdb;
     $table_name = $wpdb->prefix . 'ems';
@@ -77,14 +79,14 @@ function ems_update_callback() {
     // Check if employee ID is set
     if (isset($employee_data['id'])) {
         if (!empty($id)) {
-            // Sanitize input fields
+            //Sanitize input fields
             $emp_id = sanitize_text_field($employee_data['emp_id']);
             $emp_name = sanitize_text_field($employee_data['emp_name']);
             $emp_email = sanitize_email($employee_data['emp_email']);
             $emp_dept = sanitize_text_field($employee_data['emp_dept']);
             $emp_date = sanitize_text_field($employee_data['emp_date']);
 
-            // Update data in the database
+            //Update data in the database
             $wpdb->update(
                 $table_name,
                 array(
@@ -106,7 +108,10 @@ function ems_update_callback() {
     }
 }
 
-// AJAX callback for deleting an employee
+
+/**
+ * AJAX callback function for deleting an employee
+ */ 
 function ems_delete_callback() {
     check_ajax_referer('employee_scripts_nonce', 'nonce');
     global $wpdb;
@@ -123,6 +128,7 @@ function ems_delete_callback() {
             $msg = "Deletion Failed";
         }
     }
+
     // Send JSON response with the message
     wp_send_json_success($msg);
 }

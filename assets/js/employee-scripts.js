@@ -1,5 +1,7 @@
 (function ($) {
-     // AJAX method for adding an employee
+     /**
+      * AJAX method for adding an employee
+      */ 
     function ajaxMethodCalling(emp_data) {
         jQuery.ajax({
             type: "post",
@@ -17,7 +19,9 @@
         });
     }
 
-    // Ajax Method for deleting
+    /**
+     *  Ajax Method for deleting
+     */
     function ajaxMethodDeleting(emp_id,$button) {
         jQuery.ajax({
             type: "post",
@@ -37,7 +41,9 @@
         });
     }
 
-    // Document ready function for form validation
+    /**
+     *  For form validation
+     */ 
     $(document).ready(function () {
         $('#emsform').validate({
             rules: {
@@ -60,7 +66,9 @@
     });
 
 
-    // Document ready function for adding an employee
+    /**
+     * Document ready function for adding an employee
+     */ 
     $(document).ready(function () {
 
         jQuery(".add-btn").click(function (e) {
@@ -86,7 +94,9 @@
 
         });
 
-        // Ajax Request for deleting data
+        /**
+         * Ajax Request for deleting data
+         */ 
         $('.emp-data-delete').on('click', function () {
         // Use $(this) to refer to the current button element
         let $button = $(this)
@@ -105,7 +115,9 @@
     });
 
 
-  // Editing Ajax Mehtod
+  /**
+   *  Ajax Mehtod for Editing data
+   */ 
   function ajaxEditMethodCalling(emp_data){
     jQuery.ajax({
         type: "post",
@@ -120,7 +132,9 @@
     });
   }
 
-  // Document ready function for editing an employee
+  /**
+   * Document ready function for editing an employee
+   */ 
   $(document).ready(function(){
     jQuery(".update-btn").click(function (e) {
         e.preventDefault();

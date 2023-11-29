@@ -1,4 +1,4 @@
-    <form method="post" class="add-employee-style" id="emsform">
+   <form method="post" class="add-employee-style" id="emsform">
         <div>
             <h1 class="add-emp-title">Add Employee</h1>
         </div>
