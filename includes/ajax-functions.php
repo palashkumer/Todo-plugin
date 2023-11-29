@@ -2,8 +2,9 @@
 
 /**
  * Function to create the database table
- */ 
-function ems_table_creator() {
+ */
+function ems_table_creator()
+{
     global $wpdb;
 
     $table_name = $wpdb->prefix . 'ems';
@@ -20,14 +21,17 @@ function ems_table_creator() {
         PRIMARY KEY  (id)
     ) $charset_collate;";
 
-    require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
-    dbDelta( $sql );
+    include_once ABSPATH . 'wp-admin/includes/upgrade.php';
+    dbDelta($sql);
 }
 
 /**
  * Ajax callback function for adding an employee
  */
-function ems_add_callback() {
+function ems_add_callback()
+{
+    check_ajax_referer('employee_scripts_nonce', 'nonce');
+
     global $wpdb;
     $table_name = $wpdb->prefix . 'ems';
     $msg = '';
@@ -69,7 +73,9 @@ function ems_add_callback() {
 /**
  * AJAX callback function for updating an employee
  */
-function ems_update_callback() {
+function ems_update_callback()
+{
+    check_ajax_referer('employee_scripts_nonce', 'nonce');
     global $wpdb;
     $table_name = $wpdb->prefix . 'ems';
     $msg = '';
@@ -108,11 +114,11 @@ function ems_update_callback() {
     }
 }
 
-
 /**
  * AJAX callback function for deleting an employee
- */ 
-function ems_delete_callback() {
+ */
+function ems_delete_callback()
+{
     check_ajax_referer('employee_scripts_nonce', 'nonce');
     global $wpdb;
     $table_name = $wpdb->prefix . 'ems';

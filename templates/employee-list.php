@@ -1,7 +1,5 @@
 <?php
- 
-
- /**
+  /**
   * Display the employee list in a table
   */ 
  if (count($employee_list) > 0):
