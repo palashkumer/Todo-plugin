@@ -3,6 +3,8 @@
     background-color: #0b0736;
     color: white;
     margin:auto;
+    border-spacing: 0;
+    border-collapse: collapse;
 }
 
 
@@ -15,8 +17,7 @@ h1.emp-list-heading {
 
 /*ADD Employee Styling*/
 .add-employee-style{
-    margin-top: 40px;
-    margin-left:25%;
+    margin: 40px auto;
     width: 400px;
     background-color: #0b0736;
     color: white;
@@ -43,12 +44,58 @@ h1.add-emp-title {
     width: 200px;
     margin-right: 10px;
 }
-
-button.btn-style {
+button.btn-style.add-btn {
+    background: #2271b1;
     color: white;
-    background-color: #7a74bf;
-    padding: 6px 24px;
-    border-radius: 15px;
-    margin-left: 310px;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+button.btn-success.edit-btn {
+    background: aquamarine;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+button.btn-danger.emp-data-delete {
+    background: red;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+button.btn-success.update-btn {
+    background: aquamarine;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
 }
 
+button.btn-success.update-btn:hover {
+    color: white;
+    /* scale: 1.2; */
+    background: green;
+}
+
+button.btn-danger.cancel-btn {
+    background: aquamarine;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button.btn-danger.cancel-btn:hover {
+    background: red;
+    color: aliceblue;
+}
+
+input.edit-field {
+    width: 100%;
+}
+td.emp_uid.emp_id {
+    width: 50px;
+}
