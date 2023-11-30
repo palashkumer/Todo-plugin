@@ -73,9 +73,54 @@ function ems_add_callback()
 /**
  * AJAX callback function for updating an employee
  */
+// function ems_update_callback()
+// {
+//     check_ajax_referer('employee_scripts_nonce', 'nonce');
+//     global $wpdb;
+//     $table_name = $wpdb->prefix . 'ems';
+//     $msg = '';
+//     $employee_data = $_POST['emp_data'];
+//     $id = isset($employee_data['id']) ? intval($employee_data['id']) : 0;
+
+//     // Check if employee ID is set
+//     if (isset($employee_data['id'])) {
+//         if (!empty($id)) {
+//             //Sanitize input fields
+//             $emp_id = sanitize_text_field($employee_data['emp_id']);
+//             $emp_name = sanitize_text_field($employee_data['emp_name']);
+//             $emp_email = sanitize_email($employee_data['emp_email']);
+//             $emp_dept = sanitize_text_field($employee_data['emp_dept']);
+//             $emp_date = sanitize_text_field($employee_data['emp_date']);
+
+//             //Update data in the database
+//             $wpdb->update(
+//                 $table_name,
+//                 array(
+//                     'emp_id' => $emp_id,
+//                     'emp_name' => $emp_name,
+//                     'emp_email' => $emp_email,
+//                     'emp_dept' => $emp_dept,
+//                     'emp_date' => $emp_date,
+//                 ),
+//                 array('id' => $id),
+//                 array('%s', '%s', '%s', '%s', '%s'),
+//                 array('%d')
+//             );
+//             $msg = 'Data Updated Successfully';
+//         }
+
+//         // Send JSON response with the message
+//         wp_send_json_success($msg);
+//     }
+// }
+
+// ajax-functions.php
+
 function ems_update_callback()
 {
+    
     check_ajax_referer('employee_scripts_nonce', 'nonce');
+    error_log(print_r($_POST,1));
     global $wpdb;
     $table_name = $wpdb->prefix . 'ems';
     $msg = '';
@@ -85,14 +130,14 @@ function ems_update_callback()
     // Check if employee ID is set
     if (isset($employee_data['id'])) {
         if (!empty($id)) {
-            //Sanitize input fields
+            // Sanitize input fields
             $emp_id = sanitize_text_field($employee_data['emp_id']);
             $emp_name = sanitize_text_field($employee_data['emp_name']);
             $emp_email = sanitize_email($employee_data['emp_email']);
             $emp_dept = sanitize_text_field($employee_data['emp_dept']);
             $emp_date = sanitize_text_field($employee_data['emp_date']);
 
-            //Update data in the database
+            // Update data in the database
             $wpdb->update(
                 $table_name,
                 array(
@@ -113,6 +158,9 @@ function ems_update_callback()
         wp_send_json_success($msg);
     }
 }
+
+
+
 
 /**
  * AJAX callback function for deleting an employee
